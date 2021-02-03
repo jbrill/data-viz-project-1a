@@ -1,6 +1,12 @@
 <template>
   <v-app> 
     <v-main>
+      <v-toolbar dark fixed width="100%">
+        <v-toolbar-title>
+          <span class="display-1 font-weight-medium" style="color: red">Subway Rankings</span>
+        </v-toolbar-title>
+        <v-toolbar-items><v-btn disabled absolute right fab icon><v-icon>mdi-book-open-blank-variant</v-icon></v-btn></v-toolbar-items>
+      </v-toolbar>
       <v-container> 
         <v-card
           outlined
@@ -28,30 +34,19 @@
           </v-card-title>
           <v-card-text>
           <v-row no-gutters justify="space-around">
-            <v-col
-              tile
-            >
-              <v-container class="pa-2 chart-contain" :id="'chart-' + idx"></v-container>
+            <v-col align="center">
+              <v-card raised rounded dense elevation="20" ripple class="pa-2" tile :id="'chart-' + idx"></v-card>
             </v-col>
           </v-row>
           </v-card-text>
         </v-card>
-        
-        <!-- <v-row>
-          <v-col v-for="(chart, chartIdx) in chartData" :key="'chart-' + chartIdx">
-            <v-card>
-              <v-card-title><v-avatar
-                left
-                :color="'#' + chart.color"
-                size="48"
-                style="font-family: 'Helvetica' !important"
-                class="white--text headline font-weight-bold"
-              >{{ chart.className }}</v-avatar></v-card-title>
-              <v-card-text class="chart-contain" :id="'chart-' + chartIdx"></v-card-text>
-            </v-card>
-          </v-col>
-        </v-row> -->
       </v-container>
+      <v-footer dark fixed elevation="10">
+        <v-layout justify-space-between flex>
+          <span class="caption">Data from <a target="_blank" class="white--text" href="https://www.straphangers.org/reports/2016/StateoftheSubways2016.pdf"><strong>Straphangers</strong></a></span>
+          <span class="caption"><a style="color: steelblue" href="https://github.com/jbrill/data-viz-project-1a" target="_blank">Code</a> by <a target="_blank" href="https://jbrill.com" class="white--text"><strong>Jason Brill</strong></a></span>
+        </v-layout>
+      </v-footer>
     </v-main>
   </v-app>
 </template>
