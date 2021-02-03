@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app> 
     <v-main>
       <v-container> 
         <v-card
@@ -58,7 +58,6 @@
 
 <script>
 const { RadarChart } = require('radar-chart-d3');
-// const d3 = require('d3');
 
 export default {
   name: 'App',
