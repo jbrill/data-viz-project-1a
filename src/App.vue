@@ -3,11 +3,11 @@
     <v-main>
       <v-toolbar dark fixed width="100%">
         <v-toolbar-title>
-          <span class="display-1 font-weight-medium" style="color: red">Subway Rankings</span>
+          <span class="display-1 font-weight-medium" style="color: red">Subway <span class="font-weight-light white--text">Rankings</span></span>
         </v-toolbar-title>
-        <v-toolbar-items><v-btn disabled absolute right fab icon><v-icon>mdi-book-open-blank-variant</v-icon></v-btn></v-toolbar-items>
+        <v-toolbar-items><v-btn absolute right fab icon><v-icon>mdi-book-open-blank-variant</v-icon></v-btn></v-toolbar-items>
       </v-toolbar>
-      <v-container> 
+      <v-container>
         <v-card
           outlined
           shaped
@@ -33,17 +33,34 @@
             </v-avatar>
           </v-card-title>
           <v-card-text>
-          <v-row no-gutters justify="space-around">
-            <v-col align="center">
-              <v-card raised rounded dense elevation="20" ripple class="pa-2" tile :id="'chart-' + idx"></v-card>
-            </v-col>
-          </v-row>
+            <v-row no-gutters justify="space-around">
+              <v-col width="30%" align="left">
+                <v-card flat class="pa-2" :id="'chart-' + idx"></v-card>
+              </v-col>
+              <v-row no-gutters justify="space-around" align="center">
+                <v-col v-for="(subChart, subChartIdx) in getChartGroup(idx)"
+                    :key="'subChart-' + subChartIdx" class="d-flex justify-center">
+                  <v-avatar
+                    left
+                    :color="'#' + subChart.color"
+                    size="34"
+                    style="{ font-family: 'Helvetica' !important}"
+                    class="white--text headline font-weight-bold chart-title"
+                  >
+                    {{ subChart.className }}
+                  </v-avatar>
+                  <div
+                    :id="'chart-' + idx + '-' + subChartIdx">
+                  </div>
+                </v-col>
+              </v-row>
+            </v-row>
           </v-card-text>
         </v-card>
       </v-container>
       <v-footer dark fixed elevation="10">
         <v-layout justify-space-between flex>
-          <span class="caption">Data from <a target="_blank" class="white--text" href="https://www.straphangers.org/reports/2016/StateoftheSubways2016.pdf"><strong>Straphangers</strong></a></span>
+          <span class="caption">Data from <a target="_blank" class="white--text" href="https://www.straphangers.org/reports/2016/StateoftheSubways2016.pdf"><strong>Straphangers</strong></a>. Charting with <a href="https://d3js.org/" target="_blank" class="white--text">D3js</a>.</span>
           <span class="caption"><a style="color: steelblue" href="https://github.com/jbrill/data-viz-project-1a" target="_blank">Code</a> by <a target="_blank" href="https://jbrill.com" class="white--text"><strong>Jason Brill</strong></a></span>
         </v-layout>
       </v-footer>
@@ -60,13 +77,30 @@ export default {
   components: {
   },
   mounted () {
-    RadarChart.defaultConfig.radius = 3;
-    RadarChart.defaultConfig.w = 400;
-    RadarChart.defaultConfig.h = 400;
     for (let idx = 0; idx < 8; idx++) {
+      RadarChart.defaultConfig.radius = 3;
+      RadarChart.defaultConfig.w = 400;
+      RadarChart.defaultConfig.h = 400;
+      RadarChart.defaultConfig.axisText = true;
+      RadarChart.defaultConfig.levels = 5;
+      RadarChart.defaultConfig.circles = true;
+      let chartGroup = this.getChartGroup(idx);
       RadarChart.draw(
         `#chart-${idx}`, this.getChartGroup(idx)
       );
+
+      RadarChart.defaultConfig.radius = 2;
+      RadarChart.defaultConfig.w = 100;
+      RadarChart.defaultConfig.h = 100;
+      RadarChart.defaultConfig.axisText = false;
+      RadarChart.defaultConfig.circles = true;
+      RadarChart.defaultConfig.levels = 4;
+      // RadarChart.defaultConfig.color = function() { return chartGroup[0].color };
+      for (let subIdx = 0; subIdx < chartGroup.length; subIdx++) {
+        RadarChart.draw(
+          `#chart-${idx}-${subIdx}`, [chartGroup[subIdx]]
+        );
+      }
     }
   },
   data: () => ({
@@ -323,13 +357,6 @@ export default {
   }),
   methods: {
     getChartGroup (idx) {
-      console.log(
-        this.chartData.filter( obj => {
-          console.log(obj.group.toString())
-          console.log(idx.toString())
-          obj.group.toString() === idx.toString();
-        })
-      )
       return this.chartData.filter( obj => {
         return obj.group.toString() === idx.toString();
       });
@@ -339,6 +366,9 @@ export default {
 </script>
 
 <style>
+html, body {
+  font-family: 'Roboto', sans-serif;
+}
 .radar-chart .area {
   fill-opacity: 0.7;
 }
@@ -357,7 +387,6 @@ export default {
   stroke: none;
 }
 #app {
-  font-family: 'Helvetica' !important;
   background: black;
 }
 .chart-contain {
@@ -385,10 +414,19 @@ export default {
 .chart-title {
   margin-right: 5px;
 }
-.axis text,line {
-  fill: white;
+.axis line, circle {
+  stroke: rgba(190, 190, 190, 0.267) !important;
+}
+.level-group line {
+  stroke: rgba(190, 190, 190, 0.26);
+}
+.axis text {
+  fill: white !important;
 }
 .radar-chart {
   overflow: inherit !important;
+}
+.chart-title {
+  font-family: 'Helvetica' !important;
 }
 </style>
