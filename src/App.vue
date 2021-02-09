@@ -30,8 +30,8 @@
           </v-col>
           <v-col cols="12" sm="4" id="radar-guide"></v-col>
         </v-row>
-        <v-row align="center" justify="center" v-for="rowIdx in Math.floor(getOrganizedCharts().length / 4)" :key="'row-' + rowIdx" no-gutters>
-          <v-col class="d-flex justify-center" v-for="(chart, chartIdx) in getOrganizedCharts().slice((rowIdx - 1) * 4, (rowIdx - 1) * 4 + 4)" :key="'row-' + (rowIdx * 4 + chartIdx)">
+        <v-row align="center" justify="center" v-for="rowIdx in 5" :key="'row-' + rowIdx" no-gutters>
+          <v-col class="d-flex justify-center" v-for="(chart, chartIdx) in organizedCharts.slice((rowIdx - 1) * 4, (rowIdx - 1) * 4 + 4)" :key="'row-' + (rowIdx * 4 + chartIdx)">
             <v-avatar
               left
               :color="'#' + chart.color"
@@ -116,6 +116,17 @@ export default {
   name: 'App',
 
   components: {
+  },
+  computed: {
+    organizedCharts() {
+      let sortedCharts = this.chartData;
+      return sortedCharts.sort(function(a, b) {
+        // Compare the 2 dates
+        if (a.group < b.group) return -1;
+        if (a.group > b.group) return 1;
+        return 0;
+      });
+    } 
   },
   mounted () {
     // var chart = RadarChart.chart();
