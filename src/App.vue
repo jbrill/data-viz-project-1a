@@ -5,9 +5,49 @@
         <v-toolbar-title>
           <span class="display-1 font-weight-medium" style="color: red">Subway <span class="font-weight-light white--text">Rankings</span></span>
         </v-toolbar-title>
-        <v-toolbar-items><v-btn absolute right fab icon><v-icon>mdi-book-open-blank-variant</v-icon></v-btn></v-toolbar-items>
+        <v-toolbar-items><v-btn target="_blank" href="https://jbrill.com/subway-guide" absolute right fab icon><v-icon>mdi-book-open-blank-variant</v-icon></v-btn></v-toolbar-items>
       </v-toolbar>
-      <v-container>
+      <v-container dark fill-height align="center" justify="center" flex>
+        <!-- <p class="white--text">{{ selectedGroup }}</p> -->
+        <!-- <v-avatar
+          v-for="(chart, chartIdx) in getChartGroup(selectedGroup)"
+          :key="'CHART' - chartIdx"
+          left
+          :color="'#' + chart.color"
+          size="48"
+          style="{ font-family: 'Helvetica' !important}"
+          class="white--text headline font-weight-bold chart-title"
+        >
+          {{ chart.className }}
+        </v-avatar> -->
+        <v-row flex align="center" justify="space-between">
+          <v-col>
+            <p class="white--text header-1">Straphangers Visualization</p>
+            <p class="grey--text caption">These radar chart visualizations are based off of Straphanger's 'State of the Subways' Report Card Campaign.</p>
+            <p class="grey--text caption">This "State of the Subways" Report Card tells riders how their lines do on these key aspects of service.</p>
+            <p class="grey--text caption">Each category is ranked from 0 to 22, where 22 is the highest score possible, and 0 is the lowest.</p>
+            <p class="grey--text caption">You can read more about the campaign <a href="https://www.straphangers.org/reports/2016/StateoftheSubways2016.pdf" target="_blank">here</a>.</p>
+          </v-col>
+          <v-col cols="12" sm="4" id="radar-guide"></v-col>
+        </v-row>
+        <v-row align="center" justify="center" v-for="rowIdx in Math.floor(getOrganizedCharts().length / 4)" :key="'row-' + rowIdx" no-gutters>
+          <v-col class="d-flex justify-center" v-for="(chart, chartIdx) in getOrganizedCharts().slice((rowIdx - 1) * 4, (rowIdx - 1) * 4 + 4)" :key="'row-' + (rowIdx * 4 + chartIdx)">
+            <v-avatar
+              left
+              :color="'#' + chart.color"
+              size="34"
+              style="{ font-family: 'Helvetica' !important}"
+              class="white--text headline font-weight-bold chart-title"
+            >
+              {{ chart.className }}
+            </v-avatar>
+            <div
+              :id="'chart-' + ((rowIdx - 1) * 4 + chartIdx)">
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+      <!-- <v-container>
         <v-card
           outlined
           shaped
@@ -57,7 +97,7 @@
             </v-row>
           </v-card-text>
         </v-card>
-      </v-container>
+      </v-container> -->
       <v-footer dark fixed elevation="10">
         <v-layout justify-space-between flex>
           <span class="caption">Data from <a target="_blank" class="white--text" href="https://www.straphangers.org/reports/2016/StateoftheSubways2016.pdf"><strong>Straphangers</strong></a>. Charting with <a href="https://d3js.org/" target="_blank" class="white--text">D3js</a>.</span>
@@ -70,6 +110,7 @@
 
 <script>
 const { RadarChart } = require('radar-chart-d3');
+const d3 = require ('d3')
 
 export default {
   name: 'App',
@@ -77,18 +118,83 @@ export default {
   components: {
   },
   mounted () {
-    for (let idx = 0; idx < 8; idx++) {
-      RadarChart.defaultConfig.radius = 3;
+    // var chart = RadarChart.chart();
+    // var cfg = chart.config(); // retrieve default config
+    // var svg = d3.select('body').append('svg')
+    //   .attr('width', cfg.w + cfg.w + 50)
+    //   .attr('height', cfg.h + cfg.h / 4);
+    // svg.append('g').classed('single', 1).datum(randomDataset()).call(chart);
+
+    // // many radars
+    // chart.config({w: cfg.w / 4, h: cfg.h / 4, axisText: false, levels: 0, circles: false});
+    // cfg = chart.config();
+    // function render() {
+    //   var game = svg.selectAll('g.game').data(
+    //     [
+    //       this.randomDataset(),
+    //       this.randomDataset(),
+    //       this.randomDataset(),
+    //       this.randomDataset()
+    //     ]
+    //   );
+    //   game.enter().append('g').classed('game', 1);
+    //   game
+    //     .attr('transform', function(d, i) { return 'translate('+((cfg.w * 4) + 50 + (i * cfg.w))+','+ (cfg.h * 1.3) +')'; })
+    //     .call(chart);
+
+    //   setTimeout(render, 1000);
+    // }
+    // render();
+    // RadarChart.draw(
+    //   '#radar-guide', [this.randomDataset()]
+    // )
+    RadarChart.defaultConfig.radius = 4;
+    RadarChart.defaultConfig.w = 400;
+    RadarChart.defaultConfig.h = 400;
+    RadarChart.defaultConfig.minValue = 0;
+    RadarChart.defaultConfig.maxValue = 22;
+    RadarChart.defaultConfig.axisText = true;
+    RadarChart.defaultConfig.axisLine = true;
+    RadarChart.defaultConfig.circles = true;
+    RadarChart.defaultConfig.levels = 4;
+    RadarChart.defaultConfig.radians = 2 * Math.PI;
+    RadarChart.defaultConfig.factor = 0;
+    RadarChart.defaultConfig.factorLegend = 2;
+
+    let chart = RadarChart.chart();
+    let cfg = chart.config();
+    let instance = this;
+    let svg = d3.select('#radar-guide').append('svg')
+      .attr('width', cfg.w + cfg.w + 50)
+      .attr('height', cfg.h + cfg.h / 4);
+
+    let randomDataset = this.getChartGroup(this.selectedGroup)
+    svg.append('g').classed('single', 1).datum([randomDataset]).call(chart);
+    function render () {
+      RadarChart.defaultConfig.radius = 4;
       RadarChart.defaultConfig.w = 400;
       RadarChart.defaultConfig.h = 400;
+      RadarChart.defaultConfig.minValue = 0;
+      RadarChart.defaultConfig.maxValue = 22;
       RadarChart.defaultConfig.axisText = true;
-      RadarChart.defaultConfig.levels = 5;
+      RadarChart.defaultConfig.axisLine = true;
       RadarChart.defaultConfig.circles = true;
-      let chartGroup = this.getChartGroup(idx);
-      RadarChart.draw(
-        `#chart-${idx}`, this.getChartGroup(idx)
-      );
-
+      RadarChart.defaultConfig.levels = 4;
+      RadarChart.defaultConfig.radians = 2 * Math.PI;
+      RadarChart.defaultConfig.factor = 0.95;
+      RadarChart.defaultConfig.factorLegend = 1;
+      // var cfg = chart.config(); // retrieve default config
+      // d3.selectAll('g.single').remove();
+      let selectedGroup = instance.getSelectedGroup();
+      svg.selectAll('g.single').datum(
+        instance.getChartGroup(selectedGroup)
+      ).call(chart);
+      // myChart.enter().append('g').classed('game', 1)
+      
+      setTimeout(render, 2000);
+    }
+    render();
+    for (let chartIdx = 0; chartIdx < this.getOrganizedCharts().length; chartIdx++) {
       RadarChart.defaultConfig.radius = 2;
       RadarChart.defaultConfig.w = 100;
       RadarChart.defaultConfig.h = 100;
@@ -96,15 +202,41 @@ export default {
       RadarChart.defaultConfig.circles = true;
       RadarChart.defaultConfig.levels = 4;
       // RadarChart.defaultConfig.color = function() { return chartGroup[0].color };
-      for (let subIdx = 0; subIdx < chartGroup.length; subIdx++) {
-        RadarChart.draw(
-          `#chart-${idx}-${subIdx}`, [chartGroup[subIdx]]
-        );
-      }
+      // for (let subIdx = 0; subIdx < chartGroup.length; subIdx++) {
+      RadarChart.draw(
+        `#chart-${chartIdx}`, [this.getOrganizedCharts()[chartIdx]]
+      );
+      // }
     }
+    // for (let idx = 0; idx < 8; idx++) {
+    //   RadarChart.defaultConfig.radius = 3;
+    //   RadarChart.defaultConfig.w = 400;
+    //   RadarChart.defaultConfig.h = 400;
+    //   RadarChart.defaultConfig.axisText = true;
+    //   RadarChart.defaultConfig.levels = 5;
+    //   RadarChart.defaultConfig.circles = true;
+    //   let chartGroup = this.getChartGroup(idx);
+    //   RadarChart.draw(
+    //     `#chart-${idx}`, this.getChartGroup(idx)
+    //   );
+
+    //   RadarChart.defaultConfig.radius = 2;
+    //   RadarChart.defaultConfig.w = 100;
+    //   RadarChart.defaultConfig.h = 100;
+    //   RadarChart.defaultConfig.axisText = false;
+    //   RadarChart.defaultConfig.circles = true;
+    //   RadarChart.defaultConfig.levels = 4;
+    //   // RadarChart.defaultConfig.color = function() { return chartGroup[0].color };
+    //   for (let subIdx = 0; subIdx < chartGroup.length; subIdx++) {
+    //     RadarChart.draw(
+    //       `#chart-${idx}-${subIdx}`, [chartGroup[subIdx]]
+    //     );
+    //   }
+    // }
   },
   data: () => ({
     chart: null,
+    selectedGroup: 0,
     chartData: [
       {
         className: '1',
@@ -211,19 +343,6 @@ export default {
         ]
       },
       {
-        className: 'E',
-        color: '0039A6',
-        group: 4,
-        axes: [
-          {axis: "Frequency of Trains", value: 18},
-          {axis: "Reliability of Service", value: 14},
-          {axis: "Breakdown Rate", value: 7},
-          {axis: "Seat Availability", value: 3},
-          {axis: "Interior Cleanliness", value: 12},
-          {axis: "Clarity of Announcements", value: 17}
-        ]
-      },
-      {
         className: 'F',
         color: 'FF6319',
         group: '5',
@@ -237,7 +356,20 @@ export default {
         ]
       },
       {
-        className: 'J&Z',
+        className: 'J',
+        color: '996633',
+        group: 6,
+        axes: [
+          {axis: "Frequency of Trains", value: 11},
+          {axis: "Reliability of Service", value: 18},
+          {axis: "Breakdown Rate", value: 10},
+          {axis: "Seat Availability", value: 11},
+          {axis: "Interior Cleanliness", value: 3},
+          {axis: "Clarity of Announcements", value: 12}
+        ]
+      },
+      {
+        className: 'Z',
         color: '996633',
         group: 6,
         axes: [
@@ -328,6 +460,19 @@ export default {
         ]
       },
       {
+        className: 'A',
+        color: '0039A6',
+        group: 4,
+        axes: [
+          {axis: "Frequency of Trains", value: 14},
+          {axis: "Reliability of Service", value: 13},
+          {axis: "Breakdown Rate", value: 2},
+          {axis: "Seat Availability", value: 13},
+          {axis: "Interior Cleanliness", value: 16},
+          {axis: "Clarity of Announcements", value: 6}
+        ]
+      },
+      {
         className: 'C',
         color: '0039A6',
         group: 4,
@@ -341,16 +486,16 @@ export default {
         ]
       },
       {
-        className: 'A',
+        className: 'E',
         color: '0039A6',
         group: 4,
         axes: [
-          {axis: "Frequency of Trains", value: 14},
-          {axis: "Reliability of Service", value: 13},
-          {axis: "Breakdown Rate", value: 2},
-          {axis: "Seat Availability", value: 13},
-          {axis: "Interior Cleanliness", value: 16},
-          {axis: "Clarity of Announcements", value: 6}
+          {axis: "Frequency of Trains", value: 18},
+          {axis: "Reliability of Service", value: 14},
+          {axis: "Breakdown Rate", value: 7},
+          {axis: "Seat Availability", value: 3},
+          {axis: "Interior Cleanliness", value: 12},
+          {axis: "Clarity of Announcements", value: 17}
         ]
       },
     ]
@@ -361,6 +506,22 @@ export default {
         return obj.group.toString() === idx.toString();
       });
     },
+    getSelectedGroup() {
+      let selectedGroup = Math.floor(Math.random() * 7);
+      this.selectedGroup = selectedGroup;
+      return selectedGroup;
+    },
+    getOrganizedCharts () {
+      return this.chartData.sort(function(a, b) {
+        // Compare the 2 dates
+        if (a.group < b.group) return -1;
+        if (a.group > b.group) return 1;
+        return 0;
+      });
+    },
+    randomDataset() {
+      return this.chartData[Math.floor(Math.random() * this.chartData.length)]
+    }
   }
 };
 </script>
@@ -425,6 +586,9 @@ html, body {
 }
 .radar-chart {
   overflow: inherit !important;
+}
+html {
+  background: black;
 }
 .chart-title {
   font-family: 'Helvetica' !important;
